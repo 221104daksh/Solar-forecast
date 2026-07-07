@@ -5,6 +5,7 @@ artifact and calls .predict() on it, per the project requirements.
 """
 
 from __future__ import annotations
+from utils.download_model import download_model
 
 import os
 from typing import Any
@@ -31,14 +32,25 @@ class PredictionError(Exception):
 
 
 def resolve_model_path(candidates: list[str] | None = None) -> str:
-    """Finds the first existing model file among the known candidate filenames."""
+    """
+    Returns the local model path.
+    If the model is missing, downloads it from Google Drive.
+    """
+
     for path in candidates or DEFAULT_MODEL_PATHS:
         if os.path.exists(path):
+            logger.info("Found model at %s", path)
             return path
-    raise ModelLoadError(
-        "No trained model file found. Expected 'model/best_random_forest.pkl' "
-        "(or 'model/rf_model.pkl'). Place your trained model there."
-    )
+
+    logger.info("Model not found locally. Downloading from Google Drive...")
+
+    try:
+        return download_model()
+    except Exception as exc:
+        logger.exception("Failed to download model")
+        raise ModelLoadError(
+            f"Unable to download trained model from Google Drive: {exc}"
+        ) from exc
 
 
 def load_model(model_path: str | None = None) -> Any:
