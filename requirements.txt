@@ -11,3 +11,4 @@ pydeck==0.9.1
 # The app falls back gracefully to manual city/coordinate entry if this
 # package is not installed.
 streamlit-js-eval==0.1.7
+gdown==6.1.0
